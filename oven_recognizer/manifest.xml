@@ -1,0 +1,16 @@
+<package>
+  <description brief="oven_recognizer">
+
+     oven_recognizer
+
+  </description>
+  <author>ferenc</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/oven_recognizer</url>
+  <depend package="roscpp"/>
+  <depend package="pcl"/>
+
+</package>
+
+

@@ -1,0 +1,9 @@
+<stack>
+  <description brief="iai_perception_stack">iai_perception_stack</description>
+  <author>Maintained by ferenc</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/iai_perception_stack</url>
+  <depend stack="ros" />
+
+</stack>
