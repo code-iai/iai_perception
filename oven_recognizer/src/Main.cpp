@@ -8,29 +8,35 @@
 #include <ros/ros.h>
 #include "Segmentation.hpp"
 #include "Shrinker.hpp"
+#include "Downsampler.hpp"
 
+typedef pcl::PointXYZRGB PointT;
 namespace ovenRecognizer {
 ros::Publisher pub;
-Segmentation seg;
-Shrinker shr;
+Segmentation<PointT> seg;
+Shrinker<PointT> shr;
+Downsampler<PointT> dwn;
 
 void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmpCloud1(
-			new pcl::PointCloud<pcl::PointXYZRGB>);
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmpCloud2(
-			new pcl::PointCloud<pcl::PointXYZRGB>);
+	pcl::PointCloud<PointT>::Ptr inputCloud(
+			new pcl::PointCloud<PointT>);
 	const sensor_msgs::PointCloud2::Ptr outPutCloud(
 			new sensor_msgs::PointCloud2);
-	pcl::fromROSMsg(*cloud, *tmpCloud1);
+	pcl::fromROSMsg(*cloud, *inputCloud);
 
-	shr.resizeTo(tmpCloud1, tmpCloud2, 0.9, 1.4);
-	seg.segmentFlat(tmpCloud2, tmpCloud1);
+	dwn.downsample(inputCloud);
 
-	seg.segmentCircle(tmpCloud1, tmpCloud2);
+	shr.resizeTo(dwn.outputCloud, 0.9, 1.4);
 
-	pcl::toROSMsg(*tmpCloud2, *outPutCloud);
+	seg.getEverythingOnTopOfTable(shr.outputCloud);
+
+	seg.segmentCircle(seg.outputCloud);
+
+	pcl::toROSMsg(*seg.outputCloud, *outPutCloud);
 
 	pub.publish(outPutCloud);
+
+	ROS_INFO("done");
 
 }
 }
