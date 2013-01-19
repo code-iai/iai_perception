@@ -32,6 +32,8 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
 	seg.segmentCircle(seg.outputCloud);
 
+	seg.segmentFlat(seg.outputCloud);
+
 	pcl::toROSMsg(*seg.outputCloud, *outPutCloud);
 
 	pub.publish(outPutCloud);

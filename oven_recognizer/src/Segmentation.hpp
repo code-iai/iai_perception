@@ -47,7 +47,7 @@ public:
 		// Mandatory
 		seg.setModelType(pcl::SACMODEL_PLANE);
 		seg.setMethodType(pcl::SAC_RANSAC);
-		seg.setDistanceThreshold(0.01);
+		seg.setDistanceThreshold(0.005);
 
 		seg.setInputCloud(inputCloud);
 		seg.segment(*inliers, *coefficients);
@@ -57,7 +57,7 @@ public:
 		extract.setIndices(inliers);
 
 		// invert filter
-		extract.setNegative(true);
+		extract.setNegative(false);
 		extract.filter(*outputCloud);
 
 		return true;
