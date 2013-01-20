@@ -1,5 +1,5 @@
 /*
- * Downsampler.h
+ * Downsampler.hpp
  *
  *  Created on: 18.01.2013
  *      Author: nico

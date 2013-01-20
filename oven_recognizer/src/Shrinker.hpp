@@ -34,6 +34,25 @@ public:
 						new pcl::FieldComparison<PointT>("z",
 								pcl::ComparisonOps::LT, zMax)));
 
+		range_cond->addComparison(
+				typename pcl::FieldComparison<PointT>::ConstPtr(
+						new pcl::FieldComparison<PointT>("x",
+								pcl::ComparisonOps::GT, -2.0f)));
+		range_cond->addComparison(
+				typename pcl::FieldComparison<PointT>::ConstPtr(
+						new pcl::FieldComparison<PointT>("x",
+								pcl::ComparisonOps::LT, 2.0f)));
+
+
+		range_cond->addComparison(
+				typename pcl::FieldComparison<PointT>::ConstPtr(
+						new pcl::FieldComparison<PointT>("y",
+								pcl::ComparisonOps::GT, -2.0f)));
+		range_cond->addComparison(
+				typename pcl::FieldComparison<PointT>::ConstPtr(
+						new pcl::FieldComparison<PointT>("y",
+								pcl::ComparisonOps::LT, 2.0f)));
+
 		// build the filter
 		pcl::ConditionalRemoval<PointT> condrem(range_cond);
 		condrem.setInputCloud(inputCloud);

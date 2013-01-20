@@ -10,6 +10,8 @@
   <url>http://ros.org/wiki/oven_recognizer</url>
   <depend package="roscpp"/>
   <depend package="pcl"/>
+  <depend package="object_measurer"/>
+  <depend package="tf"/>
 
 </package>
 
