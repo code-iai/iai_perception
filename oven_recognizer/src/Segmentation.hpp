@@ -35,9 +35,9 @@ public:
 
 	}
 
-	bool segmentFlat(typename pcl::PointCloud<PointT>::Ptr& inputCloud) {
+	bool segmentFlat(typename pcl::PointCloud<PointT>::Ptr& inputCloud,
+			pcl::ModelCoefficients::Ptr& coefficients) {
 
-		pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
 		pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
 		pcl::ExtractIndices<PointT> extract;
 		// Create the segmentation object
@@ -63,26 +63,38 @@ public:
 		return true;
 	}
 
-	bool segmentCircle(
-			typename pcl::PointCloud<PointT>::Ptr& inputCloud, std::vector<float>& coefficents) {
+	bool segmentCircle(typename pcl::PointCloud<PointT>::Ptr& inputCloud) {
 
-		pcl::SACSegmentation<PointT> seg;
+		pcl::NormalEstimation<PointT, pcl::Normal> ne;
+		pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg;
 		pcl::ExtractIndices<PointT> extract;
+		pcl::ExtractIndices<pcl::Normal> extract_normals;
 		typename pcl::search::KdTree<PointT>::Ptr tree(
 				new pcl::search::KdTree<PointT>());
 
+		pcl::PointCloud<pcl::Normal>::Ptr cloud_normals(
+				new pcl::PointCloud<pcl::Normal>);
 		pcl::ModelCoefficients::Ptr coefficients_cylinder(
 				new pcl::ModelCoefficients);
-		pcl::PointIndices::Ptr inliers_cylinder(new pcl::PointIndices);
+		pcl::PointIndices::Ptr inliers_plane(new pcl::PointIndices),
+				inliers_cylinder(new pcl::PointIndices);
+
+		// Estimate point normals
+		ne.setSearchMethod(tree);
+		ne.setInputCloud(inputCloud);
+		ne.setKSearch(50);
+		ne.compute(*cloud_normals);
 
 		// Create the segmentation object for circle segmentation and set all the parameters
 		seg.setOptimizeCoefficients(true);
-		seg.setModelType(pcl::SACMODEL_CIRCLE3D);
+		seg.setModelType(pcl::SACMODEL_CIRCLE2D);
 		seg.setMethodType(pcl::SAC_RANSAC);
+		seg.setNormalDistanceWeight(0.1);
 		seg.setMaxIterations(1000);
 		seg.setDistanceThreshold(0.1);
-		seg.setRadiusLimits(0.09, 0.11);
+		seg.setRadiusLimits(0.08, 0.12);
 		seg.setInputCloud(inputCloud);
+		seg.setInputNormals(cloud_normals);
 
 		// Obtain the circle inliers and coefficients
 		seg.segment(*inliers_cylinder, *coefficients_cylinder);
@@ -95,12 +107,8 @@ public:
 		extract.filter(*outputCloud);
 		if (outputCloud->points.empty()) {
 			std::cerr << "Can't find the circle component." << std::endl;
-			coefficients_cylinder->values;
+			return false;
 		}
-
-		std::cerr << *coefficients_cylinder;
-
-		coefficents.assign(coefficients_cylinder->values.begin(), coefficients_cylinder->values.end());
 
 		return true;
 	}
@@ -162,15 +170,6 @@ public:
 		ex.setHeightLimits(0.03, 0.2);
 		ex.setInputPlanarHull(hull_cloud);
 		ex.segment(*chullInliers);
-
-//		typename pcl::PointCloud<PointT>::Ptr noPlaneCloud(
-//						new pcl::PointCloud<PointT>);
-//
-//		pcl::ExtractIndices<PointT> extractPlane;
-//		extractPlane.setInputCloud(inputCloud);
-//		extractPlane.setIndices(planeInliers);
-//		extractPlane.setNegative(true);
-//		extractPlane.filter(*noPlaneCloud);
 
 		pcl::ExtractIndices<PointT> objectsOnTableFilter;
 		objectsOnTableFilter.setInputCloud(inputCloud);

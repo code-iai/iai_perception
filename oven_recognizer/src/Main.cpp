@@ -13,6 +13,8 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
+#include <math.h>
+
 typedef pcl::PointXYZRGB PointT;
 namespace ovenRecognizer {
 ros::Publisher pub;
@@ -38,7 +40,11 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
 	seg.getEverythingOnTopOfTable(shr.outputCloud);
 
-	seg.segmentFlat(seg.outputCloud);
+	seg.segmentCircle(seg.outputCloud);
+
+	pcl::ModelCoefficients::Ptr flatCoefficients(new pcl::ModelCoefficients);
+
+	seg.segmentFlat(seg.outputCloud, flatCoefficients);
 
 	pcl::toROSMsg(*seg.outputCloud, *outPutCloud);
 
@@ -47,11 +53,18 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 	PointT center;
 	cen.getCenter(seg.outputCloud, center);
 
+	float bla = std::sqrt((std::pow(flatCoefficients->values[0],2) +
+			std::pow(flatCoefficients->values[1],2) +
+			std::pow(flatCoefficients->values[2],2)));
+
 	transform.setOrigin(tf::Vector3(center.x, center.y, center.z));
-	transform.setRotation(tf::Quaternion(0.0, 0.0, 0.0));
+	transform.setRotation(
+			tf::Quaternion(flatCoefficients->values[0] / bla,
+					flatCoefficients->values[1] / bla, flatCoefficients->values[2] / bla));
 	br.sendTransform(
 			tf::StampedTransform(transform, startTime,
 					"/head_mount_kinect_rgb_optical_frame", "pancake_oven"));
+
 
 	ROS_INFO("done");
 
