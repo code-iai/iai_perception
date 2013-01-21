@@ -12,6 +12,7 @@
 #include "Center.hpp"
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
+#include <pcl/common/centroid.h>
 
 #include <math.h>
 
@@ -53,8 +54,18 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 	pub.publish(outPutCloud);
 
 	PointT center;
+
+
+	std::cerr<<"Size of output cloud:"<<seg.outputCloud->points.size()<<std::endl;
+
 	cen.getCenter(seg.outputCloud, center);
-	std::cerr<<"Center of the oven: "<<center.x<<" "<<center.y<<" "<<center.z<<std::endl;
+	Eigen::Vector4f center_vector;
+	pcl::compute3DCentroid(*seg.outputCloud,center_vector);
+
+	std::cerr<<"Center of the oven: "<<center_vector.transpose();
+
+
+
 	float bla = std::sqrt((std::pow(flatCoefficients->values[0],2) +
 			std::pow(flatCoefficients->values[1],2) +
 			std::pow(flatCoefficients->values[2],2)));
@@ -62,7 +73,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 	tf::StampedTransform transform_2;
 	    try{
 	      listener.lookupTransform("/base_link", "/head_mount_kinect_rgb_optical_frame",
-	                               ros::Time(0), transform_2);
+	                               ros::Time::now(), transform_2);
 	    }
 	    catch (tf::TransformException ex){
 	      ROS_ERROR("%s",ex.what());
@@ -71,7 +82,8 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
 
 
-	transform.setOrigin(tf::Vector3(center.x, center.y, center.z));
+	//transform.setOrigin(tf::Vector3(center.x, center.y, center.z));
+	transform.setOrigin(tf::Vector3(center_vector(0),center_vector(1),center_vector(2)));
 	transform.setRotation(orientation);
 
 
