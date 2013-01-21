@@ -24,16 +24,18 @@ Downsampler<PointT> dwn;
 Center<PointT> cen;
 
 void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
+
 	pcl::PointCloud<PointT>::Ptr inputCloud(new pcl::PointCloud<PointT>);
 	const sensor_msgs::PointCloud2::Ptr outPutCloud(
 			new sensor_msgs::PointCloud2);
 
 	pcl::fromROSMsg(*cloud, *inputCloud);
-	ros::Time startTime = ros::Time::now();
-
+	//ros::Time startTime =
 	tf::TransformBroadcaster br;
-	tf::StampedTransform transform;
+	tf::TransformListener listener;
 
+	tf::StampedTransform transform;
+	std::cerr<<"Input Cloud Size: " <<inputCloud->points.size()<<std::endl;
 	dwn.downsample(inputCloud);
 
 	shr.resizeTo(dwn.outputCloud, 0.9, 1.4);
@@ -52,17 +54,31 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
 	PointT center;
 	cen.getCenter(seg.outputCloud, center);
-
+	std::cerr<<"Center of the oven: "<<center.x<<" "<<center.y<<" "<<center.z<<std::endl;
 	float bla = std::sqrt((std::pow(flatCoefficients->values[0],2) +
 			std::pow(flatCoefficients->values[1],2) +
 			std::pow(flatCoefficients->values[2],2)));
 
+	tf::StampedTransform transform_2;
+	    try{
+	      listener.lookupTransform("/base_link", "/head_mount_kinect_rgb_optical_frame",
+	                               ros::Time(0), transform_2);
+	    }
+	    catch (tf::TransformException ex){
+	      ROS_ERROR("%s",ex.what());
+	    }
+	tf::Quaternion orientation=transform_2.getRotation();
+
+
+
 	transform.setOrigin(tf::Vector3(center.x, center.y, center.z));
-	transform.setRotation(
-			tf::Quaternion(flatCoefficients->values[0] / bla,
-					flatCoefficients->values[1] / bla, flatCoefficients->values[2] / bla));
+	transform.setRotation(orientation);
+
+
+
+
 	br.sendTransform(
-			tf::StampedTransform(transform, startTime,
+			tf::StampedTransform(transform, ros::Time::now(),
 					"/head_mount_kinect_rgb_optical_frame", "pancake_oven"));
 
 
@@ -83,9 +99,9 @@ int main(int argc, char** argv) {
 	// Create a ROS publisher for the output point cloud
 	ovenRecognizer::pub = nh.advertise<sensor_msgs::PointCloud2>(
 			"/piripiri/depth_registered/points", 1);
-
+	ros::Rate r(100);
 	ros::spin();
-
+	r.sleep();
 	return 0;
 }
 
