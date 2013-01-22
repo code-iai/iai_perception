@@ -52,7 +52,7 @@ public:
 		seg.setInputCloud(inputCloud);
 		seg.segment(*inliers, *coefficients);
 
-		extract.setKeepOrganized(true);
+	//	extract.setKeepOrganized(true);
 		extract.setInputCloud(inputCloud);
 		extract.setIndices(inliers);
 
@@ -141,7 +141,7 @@ public:
 		seg.segment(*planeInliers, *coefficients);
 
 		// Initializing with true will allow us to extract the removed indices
-		pcl::ExtractIndices<PointT> eifilter(true);
+		pcl::ExtractIndices<PointT> eifilter;
 
 		eifilter.setInputCloud(inputCloud);
 		eifilter.setIndices(planeInliers);

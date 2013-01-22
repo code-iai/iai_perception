@@ -72,7 +72,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
 	tf::StampedTransform transform_2;
 	    try{
-	      listener.lookupTransform("/base_link", "/head_mount_kinect_rgb_optical_frame",
+	      listener.lookupTransform("base_link", "head_mount_kinect_rgb_optical_frame",
 	                               ros::Time::now(), transform_2);
 	    }
 	    catch (tf::TransformException ex){
