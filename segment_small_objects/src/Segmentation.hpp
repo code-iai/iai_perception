@@ -22,23 +22,29 @@
 #include <pcl/surface/convex_hull.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/segmentation/extract_clusters.h>
+#include <pcl/common/common.h>
+#include <pcl/segmentation/region_growing_rgb.h>
 
-template<typename PointT> class Segmentation {
+template<typename PointT> class Segmentation
+{
 public:
 
 	typename pcl::PointCloud<PointT>::Ptr outputCloud;
 
 	Segmentation() :
-			outputCloud(new pcl::PointCloud<PointT>) {
+			outputCloud(new pcl::PointCloud<PointT>)
+	{
 
 	}
-	virtual ~Segmentation() {
+	virtual ~Segmentation()
+	{
 
 	}
 
 	bool extractFlat(typename pcl::PointCloud<PointT>::Ptr& inputCloud,
 			typename pcl::PointCloud<PointT>::Ptr& outputCloud,
-			pcl::PointIndices::Ptr& inliers) {
+			pcl::PointIndices::Ptr& inliers)
+	{
 
 		pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
 
@@ -67,7 +73,8 @@ public:
 	}
 
 	bool getEverythingOnTopOfTable(
-			typename pcl::PointCloud<PointT>::Ptr& inputCloud) {
+			typename pcl::PointCloud<PointT>::Ptr& inputCloud)
+	{
 
 		typename pcl::PointCloud<PointT>::Ptr cloud_filtered(
 				new pcl::PointCloud<PointT>);
@@ -133,10 +140,13 @@ public:
 		objectsOnTableFilter.setIndices(chullInliers);
 		objectsOnTableFilter.filter(*outputCloud);
 
+		ROS_ERROR("bla");
 		return true;
 	}
 
-	bool extractBigObjects(typename pcl::PointCloud<PointT>::Ptr& inputCloud) {
+	bool extractBigObjects(typename pcl::PointCloud<PointT>::Ptr& inputCloud)
+	{
+		ROS_ERROR("begin bigobj");
 		// Creating the KdTree object for the search method of the extraction
 		typename pcl::search::KdTree<PointT>::Ptr tree(
 				new pcl::search::KdTree<PointT>);
@@ -146,10 +156,12 @@ public:
 
 		pcl::PointIndices::Ptr planeIndices(new pcl::PointIndices);
 
+		ROS_ERROR("begin extractflat");
 		extractFlat(inputCloud, cloudWithoutPlane, planeIndices);
 
 		tree->setInputCloud(cloudWithoutPlane);
 
+		ROS_ERROR("begin extract");
 		std::vector<pcl::PointIndices> cluster_indices;
 		pcl::EuclideanClusterExtraction<PointT> ec;
 		ec.setClusterTolerance(0.02); // 2cm
@@ -161,7 +173,8 @@ public:
 
 		ROS_ERROR("begin iterate");
 		for (std::vector<pcl::PointIndices>::const_iterator it =
-				cluster_indices.begin(); it != cluster_indices.end(); ++it) {
+				cluster_indices.begin(); it != cluster_indices.end(); ++it)
+		{
 
 			pcl::PointIndices::Ptr segment_inliers(new pcl::PointIndices);
 			typename pcl::PointCloud<PointT>::Ptr segment_cloud(new pcl::PointCloud<PointT>);
@@ -175,32 +188,75 @@ public:
 			extract.setIndices(segment_inliers);
 
 			// invert filter
-			extract.setNegative(true);
+			extract.setNegative(false);
 			extract.filter(*segment_cloud);
 
-			/*
-			 * Get convex hull
-			 */
-			ROS_ERROR("convex hull begin");
-			typename pcl::PointCloud<PointT>::Ptr hull_cloud(
-					new pcl::PointCloud<PointT>);
-			pcl::ConvexHull<PointT> chull;
+			Eigen::Vector4f minPoint;
+			Eigen::Vector4f maxPoint;
+			pcl::getMinMax3D(*segment_cloud, minPoint, maxPoint);
 
-			ROS_ERROR("convex hull inputcloud");
-			chull.setInputCloud(segment_cloud);
-			ROS_ERROR("convex hull reconstruct: segment_cloud size: %d", segment_cloud->size());
-			chull.reconstruct(*hull_cloud);
-			ROS_ERROR("convex hull getdimension");
+			for (int i = 0; i < 3; i++)
+			{
+				minPoint(i) -= 0.02;
+				maxPoint(i) += 0.02;
+			}
 
-			ROS_INFO("dimension : %d",chull.getDimension());
-			ROS_ERROR("convex hull end");
+			pcl::PointIndices::Ptr box_inliers(new pcl::PointIndices);
+
+			pcl::getPointsInBox(*inputCloud, minPoint, maxPoint, box_inliers->indices);
+
+			//pcl::ExtractIndices<PointT> extract;
+			extract.setKeepOrganized(true);
+			extract.setInputCloud(inputCloud);
+			extract.setIndices(box_inliers);
+
+			// invert filter
+			extract.setNegative(true);
+			extract.filter(*inputCloud);
+			//outputCloud = segment_cloud;
+
 		}
-		ROS_ERROR("end iterate");
 
-		ROS_INFO("cluster: %lu", cluster_indices.size());
+		outputCloud = inputCloud;
 
 		return true;
 
+	}
+
+	bool extractColors(typename pcl::PointCloud<PointT>::Ptr& inputCloud)
+	{
+		ROS_ERROR("begin colors");
+		typename pcl::search::Search<PointT>::Ptr tree = boost::shared_ptr<pcl::search::Search<PointT> >(
+				new pcl::search::KdTree<PointT>);
+
+		pcl::RegionGrowingRGB<PointT> reg;
+		reg.setInputCloud(inputCloud);
+		reg.setSearchMethod(tree);
+		reg.setDistanceThreshold(10);
+		reg.setPointColorThreshold(6);
+		reg.setRegionColorThreshold(5);
+		reg.setMinClusterSize(100);
+		reg.setMaxClusterSize(500);
+
+		std::vector<pcl::PointIndices> clusters;
+		reg.extract(clusters);
+
+		ROS_ERROR("colorclustersize : %d", clusters.size());
+
+		if(!clusters.size()){
+			return false;
+		}
+
+		pcl::PointIndices::Ptr color_inliers(new pcl::PointIndices);
+
+		color_inliers->indices.insert(color_inliers->indices.end(),
+				clusters.begin()->indices.begin(), clusters.begin()->indices.end());
+		pcl::ExtractIndices<PointT> coloredObjects;
+		coloredObjects.setInputCloud(inputCloud);
+		coloredObjects.setIndices(color_inliers);
+		coloredObjects.filter(*outputCloud);
+
+		return true;
 	}
 };
 

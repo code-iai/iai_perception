@@ -32,9 +32,13 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& cloud) {
 
 	shr.resizeTo(dwn.outputCloud, 0, 1.4);
 
+	//shr.resizeTo(inputCloud, 0 , 1.4);
+
 	seg.getEverythingOnTopOfTable(shr.outputCloud);
 
 	seg.extractBigObjects(seg.outputCloud);
+
+	seg.extractColors(seg.outputCloud);
 
 	pcl::toROSMsg(*seg.outputCloud, *outPutCloud);
 
