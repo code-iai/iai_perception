@@ -25,7 +25,7 @@ public:
 		pcl::PassThrough<PointT> pass;
 		pass.setInputCloud(inputCloud);
 		pass.setFilterFieldName("z");
-		pass.setFilterLimits(0.0, 1.0);
+		pass.setFilterLimits(zMin, zMax);
 		pass.filter(*outputCloud);
 
 		return true;
