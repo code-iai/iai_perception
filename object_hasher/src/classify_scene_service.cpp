@@ -1,0 +1,317 @@
+/*
+ * classify_scene_service.cpp
+ *
+ *  Created on: Jun 26, 2012
+ *      Author: bbferka
+ */
+
+#include <iostream>
+#include <ros/ros.h>
+#include <icf_core/client/Client.h>
+#include <icf_core/service/ClassifierManager.h>
+
+#include <object_hasher/ObjectPartDecomposition.hpp>
+
+//ros service
+#include <object_hasher/ClassifyScene.h>
+
+//#include <ias_classifier_client/OcClient.h>
+
+#include <pcl/filters/extract_indices.h>
+#include <pcl/io/pcd_io.h>
+
+#define BOOST_FILESYSTEM_VERSION 2
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+
+
+using namespace pcl;
+using namespace pcl::io;
+using namespace std;
+
+typedef pcl::PointXYZRGB PointT;
+
+double tolerance = 0.020;
+double max_curvature = 0.01;
+int use_srand = 0;
+bool debug_mode = false;
+int min_points_in_part = 100;
+int feature_type = 0;
+bool calc_normals = true;
+int other = 0;
+int max_nr_of_grouped_segments = 8;
+int save_segmented_cloud = 0;
+double vicinity_threshold = 0.015;
+
+std::string c_type, path, base;
+
+bool g_stop = false;
+bool g_hasStopped;
+
+void managerThread()
+{
+  ros::Rate r(10);
+  while (!g_stop)
+  {
+    ros::spinOnce();
+    r.sleep();
+  }
+  g_hasStopped = true;
+}
+
+void startManagerThread()
+{
+  boost::thread thread(&managerThread);
+}
+
+void process(pcl::PointCloud<PointT>::Ptr cloud,
+             pcl::PointCloud<pcl::PointXYZLRegion>::Ptr result_cloud)
+{
+  //needed for the client
+  ros::NodeHandle nh_client;
+  nh_client.param<std::string>("classification_type", c_type, "oph");
+  nh_client.param<std::string>("base", base, "/ias_classifier_manager");
+  nh_client.getParam("path", path);
+  //OcClient *oc = new OcClient(nh_client);
+
+  std::string manager_name("ias_classifier_manager");
+
+  icf::ClassifierClient client(nh_client, manager_name, "oph", "0");
+  std::cerr<<"New Client created"<<std::endl;
+  icf::DS ds("data/rgbd_corrected_grsd.hdf5", false, true);
+
+  icf::ServerSideRepo data_store(nh_client, manager_name);
+  data_store.uploadData(ds, "train");
+  std::cerr<<"Uploading to server"<<std::endl;
+  client.assignData("train", icf::Train);
+  client.train();
+
+
+  pcl::PointCloud<PointT>::Ptr cloud_for_opd(new pcl::PointCloud<PointT>());
+  pcl::copyPointCloud(*cloud, *cloud_for_opd);
+
+  std::cerr<<"Size of cloud to be processed: "<<cloud->points.size()<<std::endl;
+		  //TODO get rid of this somehow
+
+  pcl::PointCloud<PointT>::Ptr cloud_sor_out(new pcl::PointCloud<PointT>());
+  pcl::StatisticalOutlierRemoval<PointT> sor;
+  sor.setInputCloud(cloud);
+  sor.setMeanK(10);
+  sor.setStddevMulThresh(2.0);
+  std::cerr<<"before filtering"<<std::endl;
+  sor.filter(*cloud);
+  //decomposing
+
+  std::cerr<<"Decomposition in progress!"<<std::endl;
+  ObjectPartDecomposition<PointT> *opd = new ObjectPartDecomposition<PointT>(path, use_srand);
+  opd->setInputCloud(cloud_for_opd);
+  opd->setfilename("/tmp/cloud.pcd");
+  opd->setNrOfGroupedParts(max_nr_of_grouped_segments);
+  if (save_segmented_cloud)
+    opd->saveSegmentedCloud(true);
+  opd->setVicinityThreshold(vicinity_threshold);
+  std::cerr<<"Set all parameters!"<<std::endl;
+
+  std::vector<ObjectGroup> possible_groups = opd->getFeatures(-1, tolerance, max_curvature, min_points_in_part,
+                                                              feature_type, calc_normals); //0 object ID, because it is a scene we don't consider it
+
+  std::cerr<<"Found all possible groupings!"<<std::endl;
+  if (possible_groups.size() < 1)
+  {
+    ROS_ERROR("NO GROUPS/SEGMENTS FOUND FOR THIS OBJECT! EXITING!");
+    exit(0);
+  }
+  opd->computeArrangementKey(possible_groups);
+  std::cerr << "Number of possible groupings in scene: " << possible_groups.size() << std::endl;
+  for (unsigned int j = 0; j < possible_groups.size(); ++j)
+  {
+    possible_groups[j].determinePartIdsList();
+  }
+
+  stringstream out;
+  out << opd->clusters.size() << ",";
+  for (unsigned int j = 0; j < opd->clusters.size(); ++j)
+    out << opd->clusters[j]->indices.size() << ",";
+  out << std::endl;
+  for (unsigned int j = 0; j < possible_groups.size(); ++j)
+  {
+    out << "(" << possible_groups[j].ID_ << "," << possible_groups[j].part_nr_ << ","
+        << possible_groups[j].arrangement_key_ << ",";
+    out << possible_groups[j].partIDs.transpose() << "," << possible_groups[j].size << ",";
+    out << possible_groups[j].grown_form << ")(" << possible_groups[j].descriptor_.rows() <<" "<<possible_groups[j].descriptor_.transpose() << ")";
+    out << std::endl;
+  }
+
+ // std::cerr<<out.str();
+
+  double t1 = opd->my_clock();
+  //icf::DS ds("data/rgbd_corrected_grsd.hdf5", false, true);
+//  //oc->AddData(classifier_ID, out.str(), base);
+//  std::string res ;//= oc->Classify(classifier_ID, base);
+// double t2 = opd->my_clock();
+//  ROS_INFO("CLASSIFICATION TIME: %f", t2-t1);
+//  std::cerr << "RETURNED BY CLASSIFIER:" << std::endl << res << std::endl;
+//  std::vector<std::string> lines;
+//  boost::split(lines, res, boost::is_any_of("\n"), boost::token_compress_on);
+//  std::cerr << "Number of returned part results: " << lines.size() - 1 << std::endl;
+//  int nrOfClasses = atoi(lines[0].c_str()) + 1;
+//  std::cerr << "Number of Object classes: " << nrOfClasses << std::endl;
+//  std::map<int, std::vector<float> > result_per_part_ID;
+//  for (unsigned int i = 1; i < lines.size(); ++i)
+//  {
+//    std::vector<std::string> values;
+//    if (lines[i] != "")
+//      boost::split(values, lines[i], boost::is_any_of(" "), boost::token_compress_on);
+//    else
+//      continue;
+//    for (unsigned int j = 0; j < values.size(); ++j)
+//    {
+//      if (values[j] != "")
+//      {
+//        float f = atof(values[j].c_str());
+//        result_per_part_ID[i - 1].push_back(f);
+//      }
+//      else
+//        continue;
+//    }
+//  }
+//  std::cerr << "Original Cloud size: " << cloud->size() << std::endl;
+//  vector<int> index2cluster(cloud->size(), -1);
+//  for (unsigned int i = 0; i < opd->clusters.size(); ++i)
+//  {
+//    //std::cerr<<"Segment "<<i<<" : "<<clusters[i].indices.size()<<" points;"<<std::endl;
+//    for (unsigned int j = 0; j < opd->clusters[i]->indices.size(); ++j)
+//      index2cluster.at(opd->clusters[i]->indices[j]) = i;
+//  }
+//  std::cerr << "Creating result cloud:" << std::endl;
+//  result_cloud->points.reserve(cloud->points.size());
+//
+//  for (unsigned int i = 0; i < cloud->points.size(); ++i)
+//  {
+//    if ((index2cluster[i] != -1))
+//    {
+//      pcl::PointXYZLRegion p;
+//      p.x = cloud->points[i].x;
+//      p.y = cloud->points[i].y;
+//      p.z = cloud->points[i].z;
+//      std::vector<float>::iterator max = std::max_element(result_per_part_ID[index2cluster[i]].begin(),result_per_part_ID[index2cluster[i]].end());
+//      int maxi = max - result_per_part_ID[index2cluster[i]].begin();
+//
+//      //disregarding other class
+//      if (maxi == 5 && other == 0)
+//      {
+//        *max = 0;
+//        max = std::max_element(result_per_part_ID[index2cluster[i]].begin(),
+//                               result_per_part_ID[index2cluster[i]].end());
+//        maxi = max - result_per_part_ID[index2cluster[i]].begin();
+//      }
+//      p.label = maxi + 1;
+//
+//      p.reg = index2cluster[i];
+//      result_cloud->points.push_back(p);
+//    }
+//  }
+//  result_cloud->height = 1;
+//  result_cloud->width = cloud->points.size();
+//  std::cerr << std::endl;
+//  delete opd;
+}
+
+void parse_args(std::string param_string)
+{
+ /* *
+   *    -m specify minimum number of points in a part| default value: 100
+        -r specify radius of radius_search in region growing | default value: 0.02
+        -c specify max cuvature of a point from where region growing can start | default value: 0.01
+        -s specify usage of srand 0 use srand 1 don't
+        -f feature type, specify feature(0-GRSD(default) 1-C3_HLAC 2-VOSCH )
+        -o toggle existance of other class (default 1-exist 0-disregard)
+        -n define max number of segments that can get grouped together (for scenes this should be somewhere between 3-5)
+        -v set vicinity threshold for finding groupings (in meters) default value is 0.015
+*/
+  std::vector<std::string> values;
+  boost::split(values, param_string, boost::is_any_of(" "), boost::token_compress_on);
+  std::cerr<<"Splitting "<< param_string<<std::endl;
+
+  for (std::vector<std::string>::const_iterator token = values.begin(); token < values.end(); token++)
+  {
+
+    const std::string paramName = *token;
+    if (token++ == values.end() || !boost::starts_with(paramName, "-"))
+      throw std::string("Invalid param format. Please see ... for valid parameters.");
+
+    const std::string& paramValue = *token;
+
+    switch (paramName[1])
+    {
+      case 'r':
+        tolerance = atof(paramValue.c_str());
+        break;
+      case 'm':
+        min_points_in_part = atoi(paramValue.c_str());
+        break;
+      case 'c':
+        max_curvature = atof(paramValue.c_str());
+        break;
+      case 's':
+        use_srand = atoi(paramValue.c_str());
+        break;
+      case 'f':
+        feature_type = atoi(paramValue.c_str());
+        break;
+      case 'o':
+        other = atoi(paramValue.c_str());
+        break;
+      case 'n':
+        max_nr_of_grouped_segments = atoi(paramValue.c_str());
+        break;
+      case 'v':
+        vicinity_threshold =atof(paramValue.c_str());
+        break;
+      default:
+        break;
+    }
+  }
+
+}
+
+bool call_back(object_hasher::ClassifyScene::Request &req,
+               object_hasher::ClassifyScene::Response &res)
+{
+  ROS_INFO("RECEIVING POINT CLOUD");
+  pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>());
+  pcl::PointCloud<pcl::PointXYZLRegion>::Ptr res_cloud(new pcl::PointCloud<pcl::PointXYZLRegion>());
+
+  std::cerr<<req.params<<std::endl;
+  pcl::fromROSMsg(req.in_cloud, *cloud);
+  parse_args(req.params);
+
+  std::cerr<<"Processing..."<<std::endl;
+  process(cloud, res_cloud);
+
+  pcl::io::savePCDFile("/tmp/cloud_sent.pcd", *res_cloud);
+  sensor_msgs::PointCloud2 result_cloud_blob;
+  pcl::toROSMsg(*res_cloud, result_cloud_blob);
+  res.out_cloud = result_cloud_blob;
+  g_stop=true;
+  return true;
+}
+
+int main(int argc, char** argv)
+{
+  std::string node_name = "ias_classifier_manager";
+  ros::init(argc, argv, node_name);
+
+  ros::NodeHandle n_manager("~");
+  std::cerr << "Node started:" <<node_name << std::endl;
+  icf::ClassifierManager g_manager(n_manager);
+  startManagerThread();
+  sleep(1);
+
+  ros::NodeHandle n("/classifier");
+  ros::ServiceServer service = n.advertiseService("classify_scene", call_back);
+  ROS_INFO("Ready To Classify Scenes");
+  ros::spin();
+  return (0);
+}
+
