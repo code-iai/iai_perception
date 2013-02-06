@@ -21,7 +21,7 @@ class ObjectGroup
     Eigen::VectorXf descriptor_;
     Eigen::VectorXi partIDs;
 
-    ObjectGroup():size(0),part_nr_(0), arrangement_key_(0), ID_(0), grown_form(0){
+    ObjectGroup():grown_form(0),ID_(0),arrangement_key_(0),part_nr_(0),size(0)   {
     }
     int CalculateArrangementKey(std::vector<int> grade_list){
     	 int pow = 1;
