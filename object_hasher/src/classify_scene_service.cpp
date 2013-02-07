@@ -47,6 +47,9 @@ std::string c_type, path, base;
 
 bool g_stop = false;
 bool g_hasStopped;
+bool first=true;
+
+icf::ClassifierClient *client;
 
 void managerThread()
 {
@@ -76,17 +79,20 @@ void process(pcl::PointCloud<PointT>::Ptr cloud,
 
 	std::string manager_name("ias_classifier_manager");
 
-	icf::ClassifierClient client(nh_client, manager_name, "oph", "0");
+
 	std::cerr<<"New Client created"<<std::endl;
-	icf::DS ds_train("data/rgbd_corrected_grsd.hdf5", false, true);
-
 	icf::ServerSideRepo data_store(nh_client, manager_name);
-	data_store.uploadData(ds_train, "train");
-	std::cerr<<"Uploading to server"<<std::endl;
-	client.assignData("train", icf::Train);
-	client.train();
-	std::cerr<<"Client Trained!"<<std::endl;
-
+	if(first)
+	{
+		client = new icf::ClassifierClient (nh_client, manager_name, "oph", "0");
+		icf::DS ds_train("data/rgbd_corrected_grsd.hdf5", false, true);
+		data_store.uploadData(ds_train, "train");
+		std::cerr<<"Uploading to server"<<std::endl;
+		client->assignData("train", icf::Train);
+		client->train("");
+		std::cerr<<"Client Trained!"<<std::endl;
+		first =false;
+	}
 
 	pcl::PointCloud<PointT>::Ptr cloud_for_opd(new pcl::PointCloud<PointT>());
 	pcl::copyPointCloud(*cloud, *cloud_for_opd);
@@ -185,83 +191,78 @@ void process(pcl::PointCloud<PointT>::Ptr cloud,
 	}
 	data_store.uploadData(ds_test, "test");
 	std::cerr<<"Uploading test data to server"<<std::endl;
-	client.assignData("test", icf::Classify);
-	client.classify();
+	client->assignData("test", icf::Classify);
+	icf::ClassificationResult result = client->classify();
+	icf::DataSet<double>::MatrixPtr confsPtr = result.confidences;
+	std::stringstream res  ;
+	res<<*result.confidences;
+	std::string res_str = res.str();
+	std::cerr << "RETURNED BY CLASSIFIER:" << std::endl << res_str << std::endl;
+	std::vector<std::string> lines;
+	boost::split(lines, res_str, boost::is_any_of("\n"), boost::token_compress_on);
+	std::cerr << "Number of returned part results: " << lines.size()<< std::endl;
+	int nrOfClasses = (*confsPtr).cols();// atoi(lines[0].c_str()) + 1;
+	std::cerr << "Number of Object classes: " << nrOfClasses << std::endl;
+	std::map<int, std::vector<float> > result_per_part_ID;
+	for (unsigned int i = 0; i < lines.size(); ++i)
+	{
+		std::vector<std::string> values;
+		if (lines[i] != "")
+			boost::split(values, lines[i], boost::is_any_of(" "), boost::token_compress_on);
+		else
+			continue;
+		for (unsigned int j = 0; j < values.size(); ++j)
+		{
+			if (values[j] != "")
+			{
+				float f = atof(values[j].c_str());
+				result_per_part_ID[i].push_back(f);
+			}
+			else
+				continue;
+		}
+	}
+	std::cerr << "Original Cloud size: " << cloud->size() << std::endl;
+	vector<int> index2cluster(cloud->size(), -1);
+	for (unsigned int i = 0; i < opd->clusters.size(); ++i)
+	{
+		//std::cerr<<"Segment "<<i<<" : "<<clusters[i].indices.size()<<" points;"<<std::endl;
+		for (unsigned int j = 0; j < opd->clusters[i]->indices.size(); ++j)
+			index2cluster.at(opd->clusters[i]->indices[j]) = i;
+	}
+	std::cerr << "Creating result cloud:" << std::endl;
+	result_cloud->points.reserve(cloud->points.size());
 
+	for (unsigned int i = 0; i < cloud->points.size(); ++i)
+	{
+		if ((index2cluster[i] != -1))
+		{
+			pcl::PointXYZLRegion p;
+			p.x = cloud->points[i].x;
+			p.y = cloud->points[i].y;
+			p.z = cloud->points[i].z;
+			std::vector<float>::iterator max = std::max_element(result_per_part_ID[index2cluster[i]].begin(),result_per_part_ID[index2cluster[i]].end());
+			int maxi = max - result_per_part_ID[index2cluster[i]].begin();
 
-	// std::cerr<<out.str();
+			//disregarding other class
+			if (maxi == 5 && other == 0)
+			{
+				*max = 0;
+				max = std::max_element(result_per_part_ID[index2cluster[i]].begin(),
+						result_per_part_ID[index2cluster[i]].end());
+				maxi = max - result_per_part_ID[index2cluster[i]].begin();
+			}
+			p.label = maxi + 1;
 
-	double t1 = opd->my_clock();
-	//icf::DS ds("data/rgbd_corrected_grsd.hdf5", false, true);
-	//  //oc->AddData(classifier_ID, out.str(), base);
-	//  std::string res ;//= oc->Classify(classifier_ID, base);
-	// double t2 = opd->my_clock();
-	//  ROS_INFO("CLASSIFICATION TIME: %f", t2-t1);
-	//  std::cerr << "RETURNED BY CLASSIFIER:" << std::endl << res << std::endl;
-	//  std::vector<std::string> lines;
-	//  boost::split(lines, res, boost::is_any_of("\n"), boost::token_compress_on);
-	//  std::cerr << "Number of returned part results: " << lines.size() - 1 << std::endl;
-	//  int nrOfClasses = atoi(lines[0].c_str()) + 1;
-	//  std::cerr << "Number of Object classes: " << nrOfClasses << std::endl;
-	//  std::map<int, std::vector<float> > result_per_part_ID;
-	//  for (unsigned int i = 1; i < lines.size(); ++i)
-	//  {
-	//    std::vector<std::string> values;
-	//    if (lines[i] != "")
-	//      boost::split(values, lines[i], boost::is_any_of(" "), boost::token_compress_on);
-	//    else
-	//      continue;
-	//    for (unsigned int j = 0; j < values.size(); ++j)
-	//    {
-	//      if (values[j] != "")
-	//      {
-	//        float f = atof(values[j].c_str());
-	//        result_per_part_ID[i - 1].push_back(f);
-	//      }
-	//      else
-	//        continue;
-	//    }
-	//  }
-	//  std::cerr << "Original Cloud size: " << cloud->size() << std::endl;
-	//  vector<int> index2cluster(cloud->size(), -1);
-	//  for (unsigned int i = 0; i < opd->clusters.size(); ++i)
-	//  {
-	//    //std::cerr<<"Segment "<<i<<" : "<<clusters[i].indices.size()<<" points;"<<std::endl;
-	//    for (unsigned int j = 0; j < opd->clusters[i]->indices.size(); ++j)
-	//      index2cluster.at(opd->clusters[i]->indices[j]) = i;
-	//  }
-	//  std::cerr << "Creating result cloud:" << std::endl;
-	//  result_cloud->points.reserve(cloud->points.size());
-	//
-	//  for (unsigned int i = 0; i < cloud->points.size(); ++i)
-	//  {
-	//    if ((index2cluster[i] != -1))
-	//    {
-	//      pcl::PointXYZLRegion p;
-	//      p.x = cloud->points[i].x;
-	//      p.y = cloud->points[i].y;
-	//      p.z = cloud->points[i].z;
-	//      std::vector<float>::iterator max = std::max_element(result_per_part_ID[index2cluster[i]].begin(),result_per_part_ID[index2cluster[i]].end());
-	//      int maxi = max - result_per_part_ID[index2cluster[i]].begin();
-	//
-	//      //disregarding other class
-	//      if (maxi == 5 && other == 0)
-	//      {
-	//        *max = 0;
-	//        max = std::max_element(result_per_part_ID[index2cluster[i]].begin(),
-	//                               result_per_part_ID[index2cluster[i]].end());
-	//        maxi = max - result_per_part_ID[index2cluster[i]].begin();
-	//      }
-	//      p.label = maxi + 1;
-	//
-	//      p.reg = index2cluster[i];
-	//      result_cloud->points.push_back(p);
-	//    }
-	//  }
-	//  result_cloud->height = 1;
-	//  result_cloud->width = cloud->points.size();
-	//  std::cerr << std::endl;
-	//  delete opd;
+			p.reg = index2cluster[i];
+			result_cloud->points.push_back(p);
+		}
+	}
+	result_cloud->height = 1;
+	result_cloud->width = result_cloud->points.size();
+	std::cerr <<"RESULT CLOUD NR OF POINT:"<< result_cloud->points.size()<<std::endl;
+	first =false;
+	delete opd;
 }
 
 void parse_args(std::string param_string)
@@ -336,11 +337,11 @@ bool call_back(object_hasher::ClassifyScene::Request &req,
 	std::cerr<<"Processing..."<<std::endl;
 	process(cloud, res_cloud);
 
-	//pcl::io::savePCDFile("/tmp/cloud_sent.pcd", *res_cloud);
+	pcl::io::savePCDFile("/tmp/cloud_sent.pcd", *res_cloud);
 	sensor_msgs::PointCloud2 result_cloud_blob;
 	pcl::toROSMsg(*res_cloud, result_cloud_blob);
 	res.out_cloud = result_cloud_blob;
-	g_stop=true;
+	//g_stop=true;
 	return true;
 }
 
