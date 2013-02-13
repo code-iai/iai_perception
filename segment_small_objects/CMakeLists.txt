@@ -28,4 +28,5 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_add_executable(main src/Main.cpp)
 
 rosbuild_link_boost(main system)
+rosbuild_add_openmp_flags(main)
 #target_link_libraries(example ${PROJECT_NAME})

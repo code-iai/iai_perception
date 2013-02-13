@@ -29,12 +29,11 @@ template<typename PointT> class Segmentation
 {
 public:
 
-	typename pcl::PointCloud<PointT>::Ptr outputCloud;
+//	typename pcl::PointCloud<PointT>::Ptr outputCloud;
 
 	pcl::PointIndices::Ptr flatinliers;
 
-	Segmentation() :
-			outputCloud(new pcl::PointCloud<PointT>), flatinliers(new pcl::PointIndices)
+	Segmentation(): flatinliers(new pcl::PointIndices)
 	{
 
 	}
@@ -146,10 +145,10 @@ public:
 			pcl::ExtractIndices<PointT> objectsOnTableFilter;
 			objectsOnTableFilter.setInputCloud(inputCloud);
 			objectsOnTableFilter.setIndices(hullInliers);
-			objectsOnTableFilter.filter(*outputCloud);
+			objectsOnTableFilter.filter(*inputCloud);
 		}
 
-		return outputCloud->size() > 100 && planeCloud->size() > 10000;
+		return inputCloud->size() > 100 && planeCloud->size() > 10000;
 	}
 
 	bool extractBigObjects(typename pcl::PointCloud<PointT>::Ptr& inputCloud)
@@ -222,7 +221,6 @@ public:
 
 			}
 
-			outputCloud = inputCloud;
 		}
 		else
 		{
@@ -242,15 +240,16 @@ public:
 		reg.setInputCloud(inputCloud);
 		reg.setSearchMethod(tree);
 		reg.setDistanceThreshold(1);
-		reg.setPointColorThreshold(20);
-		reg.setRegionColorThreshold(40);
+		reg.setPointColorThreshold(6);
+		reg.setRegionColorThreshold(5);
 		reg.setMinClusterSize(50);
-		reg.setMaxClusterSize(300);
+		reg.setMaxClusterSize(500);
 
 		std::vector<pcl::PointIndices> clusters;
 		reg.extract(clusters);
 
 
+		ROS_ERROR("Colorcluster found: %d", clusters.size());
 		for (std::vector<pcl::PointIndices>::const_iterator it =
 				clusters.begin(); it != clusters.end(); ++it)
 		{
@@ -265,6 +264,7 @@ public:
 			coloredObjects.filter(*segment_cloud);
 
 			outputVector.push_back(segment_cloud);
+			ROS_ERROR("size: %d", segment_cloud->size());
 		}
 
 		return true;
