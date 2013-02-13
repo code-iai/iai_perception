@@ -1,0 +1,28 @@
+<package>
+  <description brief="object_hasher">
+
+     object_hasher
+
+  </description>
+  <author>ferenc</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/object_hasher</url>
+
+  <!--depend package="ias_classifier_client"/-->
+  
+  <depend package="icf_core"/>
+  <depend package="icf_dataset"/>
+  <depend package="tclap"/>
+  
+  <depend package="roscpp"/>
+  <depend package="pcl"/>
+  <depend package="opencv2"/>
+  <depend package="eigen"/>
+  <depend package="sensor_msgs"/>
+  <depend package="c3_hlac"/>
+   
+
+</package>
+
+
