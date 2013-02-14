@@ -32,8 +32,10 @@ public:
 //	typename pcl::PointCloud<PointT>::Ptr outputCloud;
 
 	pcl::PointIndices::Ptr flatinliers;
+	typename pcl::PointCloud<PointT>::Ptr hull;
 
-	Segmentation(): flatinliers(new pcl::PointIndices)
+	Segmentation() :
+			flatinliers(new pcl::PointIndices), hull(new pcl::PointCloud<PointT>)
 	{
 
 	}
@@ -146,6 +148,8 @@ public:
 			objectsOnTableFilter.setInputCloud(inputCloud);
 			objectsOnTableFilter.setIndices(hullInliers);
 			objectsOnTableFilter.filter(*inputCloud);
+
+			hull = hull_cloud;
 		}
 
 		return inputCloud->size() > 100 && planeCloud->size() > 10000;
@@ -167,10 +171,10 @@ public:
 				return false;
 			}
 
-			//ROS_ERROR("tree: %d", cloudWithoutPlane->size());
+			ROS_ERROR("tree: %d", cloudWithoutPlane->size());
 			tree->setInputCloud(cloudWithoutPlane);
 
-			//ROS_ERROR("tree end");
+			ROS_ERROR("tree end");
 			std::vector<pcl::PointIndices> cluster_indices;
 			pcl::EuclideanClusterExtraction<PointT> ec;
 			ec.setClusterTolerance(0.02); // 2cm
@@ -248,7 +252,6 @@ public:
 		std::vector<pcl::PointIndices> clusters;
 		reg.extract(clusters);
 
-
 		ROS_ERROR("Colorcluster found: %d", clusters.size());
 		for (std::vector<pcl::PointIndices>::const_iterator it =
 				clusters.begin(); it != clusters.end(); ++it)
@@ -265,6 +268,77 @@ public:
 
 			outputVector.push_back(segment_cloud);
 			ROS_ERROR("size: %d", segment_cloud->size());
+		}
+
+		return true;
+	}
+
+	bool extractAllObjects(typename pcl::PointCloud<PointT>::Ptr& inputCloud, std::vector<typename pcl::PointCloud<PointT>::Ptr>& outputVector)
+	{
+		typename pcl::search::KdTree<PointT>::Ptr tree(
+				new pcl::search::KdTree<PointT>);
+
+		std::vector<pcl::PointIndices> cluster_indices;
+		pcl::EuclideanClusterExtraction<PointT> ec;
+		ec.setClusterTolerance(0.02); // 2cm
+		ec.setMinClusterSize(40);
+		ec.setMaxClusterSize(2000);
+		ec.setSearchMethod(tree);
+		ec.setInputCloud(inputCloud);
+		ec.extract(cluster_indices);
+
+		for (std::vector<pcl::PointIndices>::const_iterator it =
+				cluster_indices.begin(); it != cluster_indices.end(); ++it)
+		{
+			pcl::PointIndices::Ptr color_inliers(new pcl::PointIndices);
+			typename pcl::PointCloud<PointT>::Ptr segment_cloud(new pcl::PointCloud<PointT>);
+
+			color_inliers->indices.insert(color_inliers->indices.end(),
+					it->indices.begin(), it->indices.end());
+			pcl::ExtractIndices<PointT> coloredObjects;
+			coloredObjects.setInputCloud(inputCloud);
+			coloredObjects.setIndices(color_inliers);
+			coloredObjects.filter(*segment_cloud);
+
+			outputVector.push_back(segment_cloud);
+		}
+
+		return true;
+	}
+
+	bool extractHullCollisions(std::vector<typename pcl::PointCloud<PointT>::Ptr>& outputVector)
+	{
+
+		pcl::KdTreeFLANN<PointT> kdtree;
+
+		for (typename std::vector<typename pcl::PointCloud<PointT>::Ptr>::iterator it = outputVector.begin(); it != outputVector.end(); )
+		{
+			bool erased = false;
+
+			kdtree.setInputCloud(hull);
+			typename std::vector<PointT, Eigen::aligned_allocator_indirection<PointT> >::iterator it2 = (*it)->points.begin();
+			typename std::vector<PointT, Eigen::aligned_allocator_indirection<PointT> >::iterator itend = (*it)->points.end();
+			for (; it2 != itend; it2++)
+			{
+
+				// Neighbors within radius search
+
+				std::vector<int> pointIdxRadiusSearch;
+				std::vector<float> pointRadiusSquaredDistance;
+
+				const float radius = 0.02f;
+
+				if (kdtree.radiusSearch(*it2, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
+				{
+					it = outputVector.erase(it);
+					erased = true;
+					break;
+				}
+			}
+
+			if(!erased){
+				it++;
+			}
 		}
 
 		return true;
