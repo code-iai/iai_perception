@@ -20,10 +20,12 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/surface/convex_hull.h>
+#include <pcl/surface/concave_hull.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/common/common.h>
 #include <pcl/segmentation/region_growing_rgb.h>
+#include <algorithm>
 
 template<typename PointT> class Segmentation
 {
@@ -58,7 +60,7 @@ public:
 		// Mandatory
 		seg.setModelType(pcl::SACMODEL_PLANE);
 		seg.setMethodType(pcl::SAC_RANSAC);
-		seg.setDistanceThreshold(0.01);
+		seg.setDistanceThreshold(0.03);
 
 		seg.setInputCloud(inputCloud);
 		seg.segment(*flatinliers, *coefficients);
@@ -67,25 +69,23 @@ public:
 		extract.setInputCloud(inputCloud);
 		extract.setIndices(flatinliers);
 
-		// invert filter
-
 		typename pcl::PointCloud<PointT>::Ptr plane_cloud(new pcl::PointCloud<PointT>);
 		extract.setNegative(false);
 		extract.filter(*plane_cloud);
 
 		typename pcl::search::KdTree<PointT>::Ptr tree(
 				new pcl::search::KdTree<PointT>);
-
 		std::vector<pcl::PointIndices> cluster_indices;
 		pcl::EuclideanClusterExtraction<PointT> ec;
-		ec.setClusterTolerance(0.02); // 2cm
-		ec.setMinClusterSize(500);
+		ec.setClusterTolerance(0.01); // 2cm
+		ec.setMinClusterSize(5000);
 		ec.setSearchMethod(tree);
 		ec.setInputCloud(plane_cloud);
 		ec.extract(cluster_indices);
 
-		if (cluster_indices.size() == 1)
+		if (cluster_indices.size() >= 1)
 		{
+
 			pcl::PointIndices::Ptr segment_inliers(new pcl::PointIndices);
 
 			segment_inliers->indices.insert(segment_inliers->indices.end(),
@@ -100,7 +100,7 @@ public:
 			extract.filter(*outputCloud);
 		}
 
-		return cluster_indices.size() == 1;
+		return cluster_indices.size() >= 1 && outputCloud->size() > 100;
 	}
 
 	bool getEverythingOnTopOfTable(
@@ -155,7 +155,7 @@ public:
 		return inputCloud->size() > 100 && planeCloud->size() > 10000;
 	}
 
-	bool extractBigObjects(typename pcl::PointCloud<PointT>::Ptr& inputCloud)
+	bool extractBigObjects(typename pcl::PointCloud<PointT>::Ptr& inputCloud, std::vector<typename pcl::PointCloud<PointT>::Ptr>& clusters)
 	{
 		// Creating the KdTree object for the search method of the extraction
 		typename pcl::search::KdTree<PointT>::Ptr tree(
@@ -171,13 +171,11 @@ public:
 				return false;
 			}
 
-			ROS_ERROR("tree: %d", cloudWithoutPlane->size());
 			tree->setInputCloud(cloudWithoutPlane);
 
-			ROS_ERROR("tree end");
 			std::vector<pcl::PointIndices> cluster_indices;
 			pcl::EuclideanClusterExtraction<PointT> ec;
-			ec.setClusterTolerance(0.02); // 2cm
+			ec.setClusterTolerance(0.05); // 2cm
 			ec.setMinClusterSize(100);
 			ec.setMaxClusterSize(25000);
 			ec.setSearchMethod(tree);
@@ -201,6 +199,8 @@ public:
 
 				extract.setNegative(false);
 				extract.filter(*segment_cloud);
+
+//				clusters.push_back(segment_cloud);
 
 				Eigen::Vector4f minPoint;
 				Eigen::Vector4f maxPoint;
@@ -311,7 +311,7 @@ public:
 
 		pcl::KdTreeFLANN<PointT> kdtree;
 
-		for (typename std::vector<typename pcl::PointCloud<PointT>::Ptr>::iterator it = outputVector.begin(); it != outputVector.end(); )
+		for (typename std::vector<typename pcl::PointCloud<PointT>::Ptr>::iterator it = outputVector.begin(); it != outputVector.end();)
 		{
 			bool erased = false;
 
@@ -326,7 +326,7 @@ public:
 				std::vector<int> pointIdxRadiusSearch;
 				std::vector<float> pointRadiusSquaredDistance;
 
-				const float radius = 0.02f;
+				const float radius = 0.05f;
 
 				if (kdtree.radiusSearch(*it2, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
 				{
@@ -336,7 +336,8 @@ public:
 				}
 			}
 
-			if(!erased){
+			if (!erased)
+			{
 				it++;
 			}
 		}

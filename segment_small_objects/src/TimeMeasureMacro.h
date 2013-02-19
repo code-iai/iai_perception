@@ -13,6 +13,7 @@
 #define DEBUG_TIME(name, code)\
 {\
 	ros::Time time = ros::Time::now();\
+	ROS_ERROR(name "begin");\
 	code\
 	ROS_ERROR(name ": %f ms", 0.000001 * (ros::Time::now() - time).nsec);\
 }
