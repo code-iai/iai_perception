@@ -1,0 +1,6 @@
+<launch>
+
+  <node pkg="icf_core" type="icf_service_node" name="ias_classifier_manager" output="screen" respawn="true">
+  </node>
+
+</launch>

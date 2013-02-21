@@ -1,0 +1,20 @@
+Public IAS Classification Framework
+===================================
+
+A set of ROS nodes and command line tools for a simple to use classification
+framework for robotics applications. Apart from an interface to common
+classifiers, it also contains tools for ensemble learning and hashing.
+
+The focus is on RGBD data, and at the moment the following features are
+supported: Spin Images, VFH, PFH, FPFH and SHOT, with more being being
+enabled soon.
+
+We switched to HDF5 file format for storage, that can be easily manipulated
+using Matlab/Octave/Weka for example. Currently SVM, KNN and boosting is
+supported, usable either through command line tools or C++.
+
+We are currently in the process of porting the beta code into its final
+form, fine-tuning the tools, creating examples and preparing for the first
+release.
+
+Project home: http://code.in.tum.de/indefero/index.php//p/ias-cf/

@@ -1,0 +1,17 @@
+<package>
+  <description brief="icf_feature_extraction">
+     The icf_feature_extraction package provides the tools for extracting features
+     from data into the format needed by the ICF framework (using PCL and OpenCV).
+  </description>
+  <author>Florian Seidel, Ferenc Balint-Benczedi, Zoltan-Csaba Marton</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://code.in.tum.de/indefero/index.php//p/ias-cf/</url>
+  <depend package="roscpp"/>  
+  <depend package="pcl"/>
+  <depend package="opencv2"/>
+  <depend package="tclap"/> 
+  <depend package="icf_core"/>
+          
+  <platform os="ubuntu" version="11.10"/> <!-- tested -->
+</package>
