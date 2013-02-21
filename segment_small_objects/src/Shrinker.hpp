@@ -12,8 +12,7 @@
 
 template<typename PointT> class Shrinker {
 public:
-	typename pcl::PointCloud<PointT>::Ptr outputCloud;
-	Shrinker():outputCloud(new pcl::PointCloud<PointT>) {
+	Shrinker(){
 
 	}
 	virtual ~Shrinker() {
@@ -26,7 +25,7 @@ public:
 		pass.setInputCloud(inputCloud);
 		pass.setFilterFieldName("z");
 		pass.setFilterLimits(zMin, zMax);
-		pass.filter(*outputCloud);
+		pass.filter(*inputCloud);
 
 		return true;
 	}

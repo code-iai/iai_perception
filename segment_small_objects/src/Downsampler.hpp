@@ -28,6 +28,7 @@ public:
 		sor.setLeafSize(leafSize, leafSize, leafSize);
 		sor.filter(*outputCloud);
 
+
 		return true;
 	}
 
