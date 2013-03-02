@@ -1,0 +1,5 @@
+int64 clID
+string clSlot
+string dsID
+---
+string result

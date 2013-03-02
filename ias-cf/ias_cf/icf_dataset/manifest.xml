@@ -1,0 +1,22 @@
+<package>
+  <description brief="icf_dataset">
+     The icf_dataset package contains an interface to the HDF5 file format
+     for using arbitrary matrices identified with string labels. These
+     matrices can be manipulated using the Eigen library and used in ICF.
+  </description>
+  <author>Florian Seidel, Ferenc Balint-Benczedi, Zoltan-Csaba Marton</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://code.in.tum.de/indefero/index.php//p/ias-cf/</url>
+  <depend package="roscpp"/> 
+  <depend package="eigen"/>
+  <depend package="opencv2"/>
+  <depend package="tclap"/>
+  <depend package="hdf5current"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/src" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -licf_dataset"/>
+  </export>
+  
+  <platform os="ubuntu" version="11.10"/> <!-- tested -->
+</package>
