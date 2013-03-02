@@ -1,0 +1,23 @@
+<package>
+  <description brief="icf_core">
+     The icf_core package holds the main components of the ICF framework,
+     like the classifers, the service manager and the client.
+  </description>
+  <author>Florian Seidel, Ferenc Balint-Benczedi, Zoltan-Csaba Marton</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://code.in.tum.de/indefero/index.php//p/ias-cf/</url>
+  <depend package="roscpp"/> 
+  <depend package="flann"/>
+  <depend package="libsvm"/>
+  <depend package="tclap"/>
+  <depend package="icf_dataset"/>
+  <depend package="tf_conversions"/>
+  <export>
+    <cpp cflags="-I${prefix}/include -I${prefix}/src" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -licf_base"/>
+    <cpp cflags="-I${prefix}/include -I${prefix}/src" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -licf_service_lib"/>
+    <cpp cflags="-I${prefix}/include -I${prefix}/src" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -licf_client"/>
+    <cpp cflags="-I${prefix}/include -I${prefix}/src" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -licf_classifiers"/>
+  </export>
+  <platform os="ubuntu" version="11.10"/> <!-- tested -->
+</package>
