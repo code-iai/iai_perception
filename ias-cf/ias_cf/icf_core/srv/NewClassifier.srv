@@ -1,5 +1,0 @@
-string classifier_type
-string parameters
----
-int64 ID
-string result

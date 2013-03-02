@@ -1,5 +1,0 @@
-int64 ID
-string filename
----
-string result
-string confMatrix
