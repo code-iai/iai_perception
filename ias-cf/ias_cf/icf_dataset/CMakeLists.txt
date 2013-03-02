@@ -30,8 +30,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 #Build lib
-find_package(Eigen REQUIRED)
-include_directories(${Eigen_INCLUDE_DIRS})
+#find_package(Eigen REQUIRED)
+#include_directories(${Eigen_INCLUDE_DIRS})
 
 rosbuild_add_library(icf_dataset
         src/IOUtils.cpp

@@ -20,7 +20,7 @@
   <depend package="opencv2"/>
   <depend package="eigen"/>
   <depend package="sensor_msgs"/>
-  <depend package="c3_hlac"/>
+  <!--depend package="c3_hlac"/-->
    
 
 </package>

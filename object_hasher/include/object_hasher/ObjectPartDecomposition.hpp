@@ -41,7 +41,7 @@
 #include "object_hasher/ObjectGroup.h"
 #include "object_hasher/point_type.h"
 
-#include "c3_hlac/c3_hlac_tools.h"
+//#include "c3_hlac/c3_hlac_tools.h"
 
 
 #ifndef OBJECTPARTDECOMPOSITION_H_
@@ -480,31 +480,31 @@ public:
   }
 
 
-  void computeC3HLAC(PointTPtr input_cloud, const boost::shared_ptr<const pcl::PointIndices > indices, Eigen::VectorXf &descriptor)
-  {
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr copy_cloud(new pcl::PointCloud<pcl::PointXYZRGB>) ;
-    pcl::copyPointCloud(*input_cloud, *copy_cloud);
-
-    pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr segment(new pcl::PointCloud<pcl::PointXYZRGB>);
-    extract.setInputCloud(copy_cloud);
-    extract.setIndices(indices);
-    extract.setNegative(false);
-    extract.filter(*segment);
-
-    const double voxel_size = 0.02;
-    pcl::VoxelGrid<pcl::PointXYZRGB> grid;
-    pcl::PointCloud<pcl::PointXYZRGB> cloud_downsampled;
-    getVoxelGrid(grid, *segment, cloud_downsampled, voxel_size);
-
-    std::vector<float> c3_hlac;
-    extractC3HLACSignature117(grid, cloud_downsampled, c3_hlac, 127, 127, 127, voxel_size);
-    descriptor.resize(c3_hlac.size());
-    for (unsigned int i=0; i<c3_hlac.size();++i)
-    {
-      descriptor[i] = c3_hlac[i];
-    }
-  }
+//  void computeC3HLAC(PointTPtr input_cloud, const boost::shared_ptr<const pcl::PointIndices > indices, Eigen::VectorXf &descriptor)
+//  {
+//   pcl::PointCloud<pcl::PointXYZRGB>::Ptr copy_cloud(new pcl::PointCloud<pcl::PointXYZRGB>) ;
+//    pcl::copyPointCloud(*input_cloud, *copy_cloud);
+//
+//    pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr segment(new pcl::PointCloud<pcl::PointXYZRGB>);
+//    extract.setInputCloud(copy_cloud);
+//    extract.setIndices(indices);
+//    extract.setNegative(false);
+//    extract.filter(*segment);
+//
+//    const double voxel_size = 0.02;
+//    pcl::VoxelGrid<pcl::PointXYZRGB> grid;
+//    pcl::PointCloud<pcl::PointXYZRGB> cloud_downsampled;
+//    getVoxelGrid(grid, *segment, cloud_downsampled, voxel_size);
+//
+//    std::vector<float> c3_hlac;
+//    extractC3HLACSignature117(grid, cloud_downsampled, c3_hlac, 127, 127, 127, voxel_size);
+//    descriptor.resize(c3_hlac.size());
+//    for (unsigned int i=0; i<c3_hlac.size();++i)
+//    {
+//      descriptor[i] = c3_hlac[i];
+//    }
+//  }
 
   void computeGRSD2(/*pcl::PointCloud<PointT>::Ptr*/PointTPtr input_cloud, pcl::PointCloud<pcl::Normal>::Ptr cloud_normals,
                     const boost::shared_ptr<pcl::PointIndices > indices, Eigen::VectorXf &descriptor)

@@ -8,7 +8,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://code.in.tum.de/indefero/index.php//p/ias-cf/</url>
   <depend package="roscpp"/> 
-  <rosdep name="flann"/>
+  <depend package="flann"/>
   <depend package="libsvm"/>
   <depend package="tclap"/>
   <depend package="icf_dataset"/>
