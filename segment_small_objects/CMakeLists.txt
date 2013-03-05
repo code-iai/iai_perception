@@ -25,7 +25,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
-rosbuild_add_executable(main src/Main.cpp)
+rosbuild_add_library(main src/Segmentator.cpp)
 
 rosbuild_link_boost(main system)
 rosbuild_add_openmp_flags(main)
