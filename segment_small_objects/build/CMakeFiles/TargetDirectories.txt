@@ -1,0 +1,16 @@
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/ROSBUILD_genmsg_cpp.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/ROSBUILD_genmsg_lisp.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/ROSBUILD_gensrv_cpp.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/ROSBUILD_gensrv_lisp.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/clean-test-results.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/main.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/rosbuild_precompile.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/rosbuild_premsgsrvgen.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/rospack_genmsg.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/rospack_genmsg_libexe.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/rospack_gensrv.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/test.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/test-future.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/test-results.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/test-results-run.dir
+/home/nico/ros_workspace/packages/iai_perception_stack/segment_small_objects/build/CMakeFiles/tests.dir
