@@ -6,7 +6,7 @@ INCLUDE_DIR=$(shell pwd)/include
 INCLUDE_LIBSVM_DIR=$(shell pwd)/include/libsvm
 LIB_DIR=$(shell pwd)/lib
 
-VERSION=3.0
+VERSION=3.17
 
 checkedout:
 	mkdir -p $(BUILD_DIR) $(INCLUDE_DIR) $(INCLUDE_LIBSVM_DIR) $(LIB_DIR)

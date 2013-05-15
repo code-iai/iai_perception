@@ -17,7 +17,7 @@ VERSION=1.8.10
 checkedout:
 	mkdir -p $(BUILD_DIR) $(INCLUDE_DIR) $(LIB_DIR)
 	cd $(BUILD_DIR) &&\
-	wget -O $(NAME)-$(VERSION)-$(KERNEL_STR)-shared.tar.gz http://www.hdfgroup.org/ftp/HDF5/current/bin/$(KERNEL_STR)/$(NAME)-$(VERSION)-$(KERNEL_STR)-shared.tar.gz && tar xf $(NAME)-$(VERSION)-$(KERNEL_STR)-shared.tar.gz
+	wget -O $(NAME)-$(VERSION)-$(KERNEL_STR)-shared.tar.gz http://www.hdfgroup.org/ftp/HDF5/releases/${NAME}-${VERSION}/bin/$(KERNEL_STR)/$(NAME)-$(VERSION)-$(KERNEL_STR)-shared.tar.gz && tar xf $(NAME)-$(VERSION)-$(KERNEL_STR)-shared.tar.gz
 	touch checkedout
 
 installed: wiped checkedout
