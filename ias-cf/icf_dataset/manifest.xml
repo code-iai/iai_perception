@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://code.in.tum.de/indefero/index.php//p/ias-cf/</url>
   <depend package="roscpp"/> 
-  <depend package="eigen"/>
+  <rosdep name="eigen"/>
   <depend package="opencv2"/>
   <depend package="tclap"/>
   <depend package="hdf5current"/>
