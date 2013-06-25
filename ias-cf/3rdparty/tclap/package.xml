@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<package>
+  <name>tclap</name>
+  <version>1.2.1</version>
+  <description>
+  Embeds TCLAP in groovy using catkin
+  TCLAP is a small, flexible library that provides a simple interface for
+defining and accessing command line arguments. It was intially inspired by
+the user friendly CLAP libary. The difference is that this library is
+templatized, so the argument class is type independent. Type independence
+avoids identical-except-for-type objects, such as IntArg, FloatArg, and
+StringArg. While the library is not strictly compliant with the GNU or POSIX
+standards, it is close.
+
+TCLAP is written in ANSI C++ and is meant to be compatible with any
+standards-compliant C++ compiler. It is known to work on Linux, MacOS X,
+Windows, and Solaris platforms. The library is implemented entirely in
+header files making it easy to use and distribute with other software. It is
+licensed under the MIT License for worry free distribution.
+  </description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="jworch@cs.uni-bremen.de">Jan-Hendrik Worch</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>BSD</license>
+
+
+  <!-- Url tags are optional, but mutiple are allowed, one per tag -->
+  <!-- Optional attribute type can be: website, bugtracker, or repository -->
+  <!-- Example: -->
+  <url type="website">http://tclap.sourceforge.net/html/index.html</url>
+
+
+  <!-- Author tags are optional, mutiple are allowed, one per tag -->
+  <!-- Authors do not have to be maintianers, but could be -->
+  <!-- Example: -->
+  <author email="mes5k@users.sourceforge.net">Mike Smoot</author> 
+
+
+  <!-- The *_depend tags are used to specify dependencies -->
+  <!-- Dependencies can be catkin packages or system dependencies -->
+  <!-- Examples: -->
+  <!-- Use build_depend for packages you need at compile time: -->
+  <!--   <build_depend>message_generation</build_depend> -->
+  <!-- Use buildtool_depend for build tool packages: -->
+  <!--   <buildtool_depend>catkin</buildtool_depend> -->
+  <!-- Use run_depend for packages you need at runtime: -->
+  <!--   <run_depend>message_runtime</run_depend> -->
+  <!-- Use test_depend for packages you need only for testing: -->
+  <!--   <test_depend>gtest</test_depend> -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- You can specify that this package is a metapackage here: -->
+    <!-- <metapackage/> -->
+
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
