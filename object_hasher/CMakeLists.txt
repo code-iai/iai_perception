@@ -4,7 +4,7 @@ project(object_hasher)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED icf_core pcl pcl_ros roscpp sensor_msgs message_generation hdf5)
+find_package(catkin REQUIRED icf_core icf_dataset pcl pcl_ros roscpp sensor_msgs message_generation hdf5 libsvm)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)

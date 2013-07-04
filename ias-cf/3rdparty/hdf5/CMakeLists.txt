@@ -58,6 +58,8 @@ catkin_package(
 ## Build ##
 ###########
 
+execute_process(COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/lib ${CATKIN_DEVEL_PREFIX})
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})

@@ -64,7 +64,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenMP_INCLUDE_DIRS} )
 
 ## Declare a cpp library
-add_library(main
+add_library(main_seg
   src/Segmentator.cpp
 )
 
