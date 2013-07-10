@@ -24,7 +24,7 @@ catkin_package(
 ###########
 
 ## Specify additional locations of header files
-include_directories(include ${catkin_INCLUDE_DIRS} ${OpenMP_INCLUDE_DIRS} )
+include_directories(${catkin_INCLUDE_DIRS} ${OpenMP_INCLUDE_DIRS} )
 
 ## Declare a cpp library
 add_library(main_seg
