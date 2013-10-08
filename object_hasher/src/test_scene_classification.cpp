@@ -11,6 +11,8 @@
 #include <pcl/point_types.h>
 #include <object_hasher/point_type.h>
 #include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 
 int main(int argc, char** argv)

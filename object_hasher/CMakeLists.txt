@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(object_hasher)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED icf_core pcl pcl_ros roscpp sensor_msgs message_generation)
+find_package(catkin REQUIRED icf_core pcl_ros roscpp sensor_msgs message_generation)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)

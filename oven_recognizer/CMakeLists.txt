@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(oven_recognizer)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED pcl pcl_ros roscpp)
+find_package(catkin REQUIRED pcl_ros pcl_conversions pcl_msgs roscpp)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)

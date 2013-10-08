@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(segment_small_objects)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED pcl pcl_ros)
+find_package(catkin REQUIRED pcl_ros)
 
 ## System dependencies are found with CMake's conventions
 find_package(OpenMP)

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(icf_feature_extraction)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED pcl pcl_ros icf_dataset)
+find_package(catkin REQUIRED pcl_ros icf_dataset)
 
 ## System dependencies are found with CMake's conventions
 find_package(Eigen REQUIRED)
