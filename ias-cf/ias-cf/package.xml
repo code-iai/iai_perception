@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>ias-cf</name>
+  <name>ias_cf</name>
   <version>1.0.0</version>
   <description>
     The public IAS Classification Framework
