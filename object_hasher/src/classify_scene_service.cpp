@@ -20,6 +20,8 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/pcd_io.h>
 
+#include <pcl_conversions/pcl_conversions.h>
+
 #define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -331,7 +333,7 @@ bool call_back(object_hasher::ClassifyScene::Request &req,
 	pcl::PointCloud<pcl::PointXYZLRegion>::Ptr res_cloud(new pcl::PointCloud<pcl::PointXYZLRegion>());
 
 	std::cerr<<req.params<<std::endl;
-	pcl::fromROSMsg(req.in_cloud, *cloud);
+  pcl::fromROSMsg(req.in_cloud, *cloud);
 	parse_args(req.params);
 
 	std::cerr<<"Processing..."<<std::endl;

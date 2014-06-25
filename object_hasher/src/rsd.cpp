@@ -36,7 +36,7 @@
  *
  */
 
-#include <pcl/features/impl/rsd.hpp>
+#include <object_hasher/pcl/features/impl/rsd.hpp>
 
 #ifndef PCL_NO_PRECOMPILE
 #include <pcl/point_types.h>

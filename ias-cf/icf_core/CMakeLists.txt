@@ -1,7 +1,7 @@
 #TODO Add install launch file
 cmake_minimum_required(VERSION 2.8.3)
 project(icf_core)
-
+set(CMAKE_BUILD_TYPE Debug)
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS icf_dataset message_generation libsvm)
 
