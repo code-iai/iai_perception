@@ -47,17 +47,16 @@ catkin_package(
 ## Specify additional locations of header files
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
+add_library(convexity_segmenter src/convexity_segmentation.cpp)
+target_link_libraries(convexity_segmenter ${catkin_LIBRARIES})
+
 ## Declare a cpp executable
 add_executable(classify_scene_service src/classify_scene_service.cpp src/rsd.cpp)
 add_executable(convert src/converter.cpp)
 add_executable(test_service src/test_scene_classification.cpp)
-add_executable(sor_test src/sor_test.cpp)
-add_executable(test_vg src/test_voxelgrid.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(classify_scene_service ${catkin_LIBRARIES})
 target_link_libraries(convert ${catkin_LIBRARIES})
 target_link_libraries(test_service ${catkin_LIBRARIES})
-target_link_libraries(sor_test ${catkin_LIBRARIES})
-target_link_libraries(test_vg ${catkin_LIBRARIES})
 

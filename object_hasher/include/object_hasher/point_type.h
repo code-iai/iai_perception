@@ -11,7 +11,7 @@
 #include <Eigen/Core>
 #include <bitset>
 #include <vector>
-#include "pcl/ros/register_point_struct.h"
+#include "pcl/register_point_struct.h"
 #include <pcl/point_types.h>
 
 #include "object_hasher/point_type.hpp"

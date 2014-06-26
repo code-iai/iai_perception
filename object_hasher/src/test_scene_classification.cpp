@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     ROS_ERROR("Calling classify scene service");
     out_cloud_blob = srv.response.out_cloud;
     pcl::fromROSMsg(out_cloud_blob,*cloud_out);
-    ROS_INFO("Response Clouds Size: %d", cloud_out->points.size());
+    ROS_INFO("Response Clouds Size: %ld", cloud_out->points.size());
     pcl::io::savePCDFile("/tmp/result.pcd",*cloud_out);
   }
   else
