@@ -41,7 +41,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
-pcl::activeSegmentation(const pcl::PointCloud<PointT> &cloud_in,
+oph::activeSegmentation(const pcl::PointCloud<PointT> &cloud_in,
                         const pcl::PointCloud<pcl::Boundary> &boundary,
                         const pcl::PointCloud<pcl::Normal> &normals,
                         const boost::shared_ptr<pcl::search::Search<PointT> > &tree,
@@ -147,7 +147,7 @@ pcl::activeSegmentation(const pcl::PointCloud<PointT> &cloud_in,
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT, typename NormalT> void
-pcl::ActiveSegmentation<PointT, NormalT>::setFixationPoint(const PointT &p)
+oph::ActiveSegmentation<PointT, NormalT>::setFixationPoint(const PointT &p)
 {
   if(tree_->getInputCloud()->points.size() != input_->points.size())
   {
@@ -168,7 +168,7 @@ pcl::ActiveSegmentation<PointT, NormalT>::setFixationPoint(const PointT &p)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT, typename NormalT> void
-pcl::ActiveSegmentation<PointT, NormalT>::segment(PointIndices &indices_out)
+oph::ActiveSegmentation<PointT, NormalT>::segment(pcl::PointIndices &indices_out)
 {
   if(fp_index_ > input_->points.size() || fp_index_ < 0)
   {
@@ -246,7 +246,7 @@ pcl::ActiveSegmentation<PointT, NormalT>::segment(PointIndices &indices_out)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT, typename NormalT> bool
-pcl::ActiveSegmentation<PointT, NormalT>::isPointValid(
+oph::ActiveSegmentation<PointT, NormalT>::isPointValid(
   int v_point,
   int, bool &is_seed,
   bool &is_boundary

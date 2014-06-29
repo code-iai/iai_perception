@@ -75,11 +75,11 @@ void process(pcl::PointCloud<PointT>::Ptr cloud,
 {
   //needed for the client
   std::stringstream modelPath;
-  std::string packagePath;
-  ros::package::getPath(packagePath);
+  std::string packagePath ;//= "object_hasher";
+  packagePath = ros::package::getPath("object_hasher");
 
-  modelPath << packagePath << "data/rgbd_corrected_grsd.hdf5";
-
+  modelPath << packagePath << "/data/rgbd_corrected_grsd.hdf5";
+  std::cerr<<"Model Path: "<<modelPath.str();
   ros::NodeHandle nh_client;
   nh_client.param<std::string>("classification_type", c_type, "oph");
   nh_client.param<std::string>("base", base, "/ias_classifier_manager");
