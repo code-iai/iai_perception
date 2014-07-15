@@ -52,12 +52,17 @@ add_library(ophSegmentation src/segmentation/convexity_segmentation.cpp
 target_link_libraries(ophSegmentation ${catkin_LIBRARIES})
 
 ## Declare a cpp executable
-add_executable(classify_scene_service src/classify_scene_service.cpp src/rsd.cpp)
-add_executable(convert src/converter.cpp)
-add_executable(test_service src/test_scene_classification.cpp)
 
 ## Specify libraries to link a library or executable target against
+
+add_executable(classify_scene_service src/classify_scene_service.cpp src/rsd.cpp)
 target_link_libraries(classify_scene_service ${catkin_LIBRARIES})
+
+add_executable(convert src/converter.cpp)
 target_link_libraries(convert ${catkin_LIBRARIES})
+
+add_executable(test_service src/test_scene_classification.cpp)
 target_link_libraries(test_service ${catkin_LIBRARIES})
 
+add_library(segmentation src/segmentation/curvature_euclidean_region_growing.cpp)
+target_link_libraries(segmentation ${catkin_LIBRARIES})
