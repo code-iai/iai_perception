@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(object_hasher)
 set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DBT_USE_DOUBLE_PRECISION -Wno-deprecated")
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED icf_core pcl_ros roscpp sensor_msgs message_generation)
 
@@ -64,5 +65,5 @@ target_link_libraries(convert ${catkin_LIBRARIES})
 add_executable(test_service src/test_scene_classification.cpp)
 target_link_libraries(test_service ${catkin_LIBRARIES})
 
-add_library(segmentation src/segmentation/curvature_euclidean_region_growing.cpp)
+add_library(segmentation src/segmentation/euclidean_clustering_curvature.cpp)
 target_link_libraries(segmentation ${catkin_LIBRARIES})
