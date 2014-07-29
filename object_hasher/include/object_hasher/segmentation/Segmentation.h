@@ -6,7 +6,6 @@ class Segmentation
 {
 protected:
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_;
-    std::vector<pcl::PointIndices::Ptr> segments_;
 public:
 
     /**
@@ -25,6 +24,6 @@ public:
 
     }
 
-    virtual void addCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr) =0;
-    virtual void segment ()=0;
+    virtual void addCloud(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &) =0;
+    virtual void segment (std::vector<pcl::PointIndices::Ptr>&)=0;
 };

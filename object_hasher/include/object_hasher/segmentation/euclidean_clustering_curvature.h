@@ -7,6 +7,7 @@
 #include <Eigen/Core>
 #include <object_hasher/segmentation/Segmentation.h>
 #include <pcl/search/kdtree.h>
+#include <pcl/features/normal_3d_omp.h>
 #include <stdlib.h>
 #include <random>
 #include <algorithm>
@@ -19,8 +20,8 @@ class EuclideanClusterExtractorCurvature: Segmentation
 {
 private:
     pcl::search::KdTree<pcl::PointXYZRGBA>::Ptr tree_;
-    pcl::PointCloud<pcl::Normal> normals_;
-    bool normalsSet_,treeSet_,use_srand_;
+    pcl::PointCloud<pcl::Normal>::Ptr normals_;
+    bool normalsSet_,treeSet_,useSrand_,cloudSet_;
 
     //cluster size limits
     int maxPts_,minPts_;
@@ -31,11 +32,9 @@ public:
     ~EuclideanClusterExtractorCurvature();
 
 
-    inline void addCloud(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &cloud)
-    {
-        cloud_=cloud;
-    }
-    inline void setNormals(const pcl::PointCloud<pcl::Normal> &normals)
+    virtual void addCloud(const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &cloud);
+
+    inline void setNormals(const pcl::PointCloud<pcl::Normal>::Ptr &normals)
     {
         normals_=normals;
         normalsSet_=true;
@@ -47,7 +46,7 @@ public:
     }
     inline void setTrueRandom(const bool use_rand)
     {
-        use_srand_=use_rand;
+        useSrand_=use_rand;
     }
 
     inline void setMinMaxPoints(int min, int max)
@@ -81,7 +80,7 @@ public:
         maxCurvature_ = c;
     }
 
-    void segment();
+    virtual void segment(std::vector<pcl::PointIndices::Ptr>&);
     void createTree();
     void calculateNormals();
 

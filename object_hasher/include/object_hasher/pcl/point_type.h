@@ -11,10 +11,10 @@
 #include <Eigen/Core>
 #include <bitset>
 #include <vector>
-#include "pcl/register_point_struct.h"
+#include <pcl/register_point_struct.h>
 #include <pcl/point_types.h>
 
-#include "object_hasher/point_type.hpp"
+#include "object_hasher/pcl/point_type.hpp"
 
 namespace pcl {
 	struct PointNormalRADII;

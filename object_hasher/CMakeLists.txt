@@ -48,15 +48,15 @@ catkin_package(
 ## Specify additional locations of header files
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
+##libraries
 add_library(ophSegmentation src/segmentation/convexity_segmentation.cpp
                             src/segmentation/euclidean_clustering_curvature.cpp)
 target_link_libraries(ophSegmentation ${catkin_LIBRARIES})
 
 ## Declare a cpp executable
 
-## Specify libraries to link a library or executable target against
-
-add_executable(classify_scene_service src/classify_scene_service.cpp src/rsd.cpp)
+##executables
+add_executable(classify_scene_service src/classify_scene_service.cpp src/pcl/rsd.cpp)
 target_link_libraries(classify_scene_service ${catkin_LIBRARIES})
 
 add_executable(convert src/converter.cpp)
@@ -65,5 +65,5 @@ target_link_libraries(convert ${catkin_LIBRARIES})
 add_executable(test_service src/test_scene_classification.cpp)
 target_link_libraries(test_service ${catkin_LIBRARIES})
 
-add_library(segmentation src/segmentation/euclidean_clustering_curvature.cpp)
-target_link_libraries(segmentation ${catkin_LIBRARIES})
+add_executable(test_segmentation src/segmentation/test_segmentation.cpp)
+target_link_libraries(test_segmentation  ophSegmentation ${catkin_LIBRARIES})

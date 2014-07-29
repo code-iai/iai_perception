@@ -39,7 +39,7 @@
 #include <stdlib.h>
 
 #include "object_hasher/ObjectGroup.h"
-#include "object_hasher/point_type.h"
+#include "object_hasher/pcl/point_type.h"
 
 //#include "c3_hlac/c3_hlac_tools.h"
 

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <object_hasher/ClassifyScene.h>
 #include <pcl/point_types.h>
-#include <object_hasher/point_type.h>
+#include <object_hasher/pcl/point_type.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
