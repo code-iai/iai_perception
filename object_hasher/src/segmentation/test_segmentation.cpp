@@ -17,7 +17,8 @@ bool help(int argc, char *argv[])
 
     std::cout << name << " [options]" << std::endl
               << "Options:" << std::endl
-              << "  -in    <path>        Input pcd filet" << std::endl;
+              << "  -in    <file>        Input pcd filet" << std::endl
+              << "  -out   <path>        Output Path"<<std::endl;
     return true;
   }
   else
@@ -34,21 +35,34 @@ int main(int argc, char *argv[])
     return 0;
   }
   std::string pathIn = "data/test.pcd";
+  std::string pathOut = "./";
   pcl::console::parse(argc, argv, "-in", pathIn);
+  pcl::console::parse(argc, argv, "-out", pathOut);
 
   pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>());
   pcl::PCDReader reader;
+  pcl::PCDWriter writer;
   reader.read(pathIn,*cloud);
   std::cerr<<"Input Cloud has: "<<cloud->size()<<" points."<<std::endl;
-
+  std::cerr<<"Region growing based on curvature started"<<std::endl;
   std::vector<pcl::PointIndices::Ptr> segments;
   oph::EuclideanClusterExtractorCurvature ecec;
   ecec.addCloud(cloud);
+  ecec.setTrueRandom(true);
   ecec.segment(segments);
+
   std::cerr<<"Segments found: "<<segments.size()<<std::endl;
 
+  pcl::PointCloud<pcl::PointXYZL>::Ptr cloud_labeled(new pcl::PointCloud<pcl::PointXYZL>());
+  pcl::copyPointCloud(*cloud,*cloud_labeled);
+  for (unsigned int i = 0;i<segments.size(); ++i)
+  {
 
-
-
+    for(unsigned int j = 0;j<segments[i]->indices.size(); ++j)
+    {
+      cloud_labeled->points[(segments[i]->indices[j])].label = i;
+    }
+  }
+  writer.write(pathOut+"cloud_labeled.pcd",*cloud_labeled);
 
 }

@@ -10,7 +10,7 @@ ptrdiff_t myrandom(ptrdiff_t i)
 //empty constructor
 EuclideanClusterExtractorCurvature::EuclideanClusterExtractorCurvature():normalsSet_(false),cloudSet_(false),
   maxPts_(std::numeric_limits<int>::max()),treeSet_(false),eps_angle_(45*M_PI/180),distTolerance_(0.020),
-  useSrand_(false),maxCurvature_(0.01)
+  useSrand_(false),maxCurvature_(0.01),minPts_(100)
 {
 
 }
@@ -74,7 +74,7 @@ void EuclideanClusterExtractorCurvature::segment(std::vector<pcl::PointIndices::
   if(useSrand_)
   {
     std::random_shuffle(indices_rnd.begin(), indices_rnd.end(), myrandom);
-    std::cerr<<"REAL RANDOM"<<std::endl;
+    std::cerr<<"\"REAL\" RANDOM"<<std::endl;
   }
   else
   {
