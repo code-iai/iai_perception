@@ -4,6 +4,7 @@ project(icf_feature_extraction)
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED pcl_ros icf_dataset)
 
+find_package(cmake_modules QUIET)
 ## System dependencies are found with CMake's conventions
 find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)

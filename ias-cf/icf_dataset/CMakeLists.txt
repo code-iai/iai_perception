@@ -4,6 +4,7 @@ project(icf_dataset)
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS roscpp tclap hdf5)
 
+find_package(cmake_modules QUIET)
 ## System dependencies are found with CMake's conventions
 find_package(OpenCV REQUIRED)
 find_package(Eigen REQUIRED)

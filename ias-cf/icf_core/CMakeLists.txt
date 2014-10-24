@@ -5,6 +5,7 @@ set(CMAKE_BUILD_TYPE Debug)
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS icf_dataset message_generation libsvm)
 
+find_package(cmake_modules QUIET)
 ## System dependencies are found with CMake's conventions
 find_package(Eigen REQUIRED)
 
